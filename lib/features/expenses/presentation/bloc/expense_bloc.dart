@@ -34,21 +34,21 @@ class ExpenseBloc extends Bloc<ExpenseEvent, ExpenseState> {
     emit(ExpenseLoading());
     try {
       _tags = await getTags();
-    } catch (_) {
-      // ignore or log
+      _expensesSubscription?.cancel();
+      _expensesSubscription = getExpenses.watch(startDate: event.startDate, endDate: event.endDate).listen(
+        (expenses) => add(ExpensesUpdated(expenses)),
+        onError: (error) {
+        }
+      );
+    } catch (e) {
+      emit(const ExpenseError('Failed to load initial data'));
     }
-    
-    _expensesSubscription?.cancel();
-    _expensesSubscription = getExpenses.watch(startDate: event.startDate, endDate: event.endDate).listen(
-      (expenses) => add(ExpensesUpdated(expenses)),
-    );
   }
 
   Future<void> _onExpensesUpdated(ExpensesUpdated event, Emitter<ExpenseState> emit) async {
     try {
       _tags = await getTags();
     } catch (_) {
-      // ignore
     }
     final total = event.expenses.fold(0.0, (sum, e) => sum + e.amount);
     emit(ExpenseLoaded(expenses: event.expenses, tags: _tags, totalAmount: total));

@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'dashboard_page.dart';
 import 'add_expense_page.dart';
 import 'skeleton_pages.dart';
-import '../bloc/expense_bloc.dart'; // Ensure Bloc is updated before this if logic changes
+import '../bloc/expense_bloc.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
@@ -12,15 +12,17 @@ class MainPage extends StatefulWidget {
   State<MainPage> createState() => _MainPageState();
 }
 
+final fabLocation = FloatingActionButtonLocation.centerDocked;
+
 class _MainPageState extends State<MainPage> {
   int _currentIndex = 0;
 
   final List<Widget> _pages = [
-    const DashboardPage(), // 0
-    const BudgetsPage(),   // 1
-    const SizedBox(), // 2 - Placeholder for Add button
-    const ReportsPage(),   // 3
-    const SettingsPage(),  // 4
+    const DashboardPage(),
+    const BudgetsPage(),
+    const SizedBox(),
+    const ReportsPage(),
+    const SettingsPage(),
   ];
 
   void _onTabTapped(int index) {
@@ -42,33 +44,37 @@ class _MainPageState extends State<MainPage> {
         index: _currentIndex,
         children: _pages,
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTap: _onTabTapped,
-        items: [
-           const BottomNavigationBarItem(icon: Icon(Icons.dashboard_rounded), label: 'Home'),
-           const BottomNavigationBarItem(icon: Icon(Icons.pie_chart_rounded), label: 'Budgets'),
-           BottomNavigationBarItem(
-             icon: Container(
-               padding: const EdgeInsets.all(12),
-               decoration: BoxDecoration(
-                 color: Theme.of(context).primaryColor,
-                 shape: BoxShape.circle,
-                 boxShadow: [
-                   BoxShadow(
-                     color: Theme.of(context).primaryColor.withOpacity(0.3),
-                     blurRadius: 10,
-                     offset: const Offset(0, 4),
-                   ),
-                 ],
-               ),
-               child: const Icon(Icons.add, color: Colors.white),
-             ),
-             label: '',
-           ),
-           const BottomNavigationBarItem(icon: Icon(Icons.bar_chart_rounded), label: 'Reports'),
-           const BottomNavigationBarItem(icon: Icon(Icons.settings_rounded), label: 'Settings'),
-        ],
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _onTabTapped(2),
+        backgroundColor: Theme.of(context).primaryColor,
+        shape: const CircleBorder(),
+        elevation: 4,
+        child: const Icon(Icons.add, color: Colors.white, size: 30),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      bottomNavigationBar: BottomAppBar(
+        height: 70,
+        shape: const CircularNotchedRectangle(),
+        notchMargin: 8,
+        padding: EdgeInsets.zero,
+        child: BottomNavigationBar(
+          elevation: 0,
+          backgroundColor: Colors.transparent,
+          type: BottomNavigationBarType.fixed,
+          currentIndex: _currentIndex,
+          onTap: _onTabTapped,
+          selectedItemColor: Theme.of(context).primaryColor,
+          unselectedItemColor: Colors.grey,
+          showSelectedLabels: true,
+          showUnselectedLabels: true,
+          items: const [
+            BottomNavigationBarItem(icon: Icon(Icons.dashboard_rounded), label: 'Home'),
+            BottomNavigationBarItem(icon: Icon(Icons.pie_chart_rounded), label: 'Budgets'),
+            BottomNavigationBarItem(icon: SizedBox(height: 32), label: ''),
+            BottomNavigationBarItem(icon: Icon(Icons.bar_chart_rounded), label: 'Reports'),
+            BottomNavigationBarItem(icon: Icon(Icons.settings_rounded), label: 'Settings'),
+          ],
+        ),
       ),
     );
   }

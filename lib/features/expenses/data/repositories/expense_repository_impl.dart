@@ -57,7 +57,6 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
 
     final rows = await query.get();
     
-    // Efficiently fetch tags? For now, simple loop.
     final expenses = <domain.Expense>[];
     for (final row in rows) {
       final tagRows = await (database.select(database.expenseTags)
@@ -86,28 +85,22 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
       query.where((t) => t.date.isSmallerOrEqualValue(endDate));
     }
 
-    // Watch query. 
-    // Note: This simple watch won't trigger if tags change but expense doesn't.
-    // For MVP, we assume expense updates usually touch expense table.
-    // To strictly watch tags too, we need a join stream or custom stream.
-    // Let's rely on simple watch for now, or use map async which Drift supports.
-    
     return query.watch().asyncMap((rows) async {
-        final expenses = <domain.Expense>[];
-        for (final row in rows) {
-          final tagRows = await (database.select(database.expenseTags)
-                ..where((t) => t.expenseId.equals(row.id)))
-              .get();
-          
-          expenses.add(domain.Expense(
-            id: row.id,
-            amount: row.amount,
-            date: row.date,
-            description: row.description,
-            tagIds: tagRows.map((e) => e.tagId).toList(),
-          ));
-        }
-        return expenses;
+      final expenses = <domain.Expense>[];
+      for (final row in rows) {
+        final tagRows = await (database.select(database.expenseTags)
+              ..where((t) => t.expenseId.equals(row.id)))
+            .get();
+
+        expenses.add(domain.Expense(
+          id: row.id,
+          amount: row.amount,
+          date: row.date,
+          description: row.description,
+          tagIds: tagRows.map((e) => e.tagId).toList(),
+        ));
+      }
+      return expenses;
     });
   }
 
@@ -119,6 +112,7 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
         name: Value(tag.name),
         budgetLimit: Value(tag.budgetLimit),
         budgetPeriod: Value(tag.budgetPeriod),
+        colorValue: Value(tag.colorValue),
       ),
     );
   }
@@ -131,6 +125,7 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
         name: Value(tag.name),
         budgetLimit: Value(tag.budgetLimit),
         budgetPeriod: Value(tag.budgetPeriod),
+        colorValue: Value(tag.colorValue),
       ),
     );
   }
@@ -148,6 +143,7 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
       name: r.name,
       budgetLimit: r.budgetLimit,
       budgetPeriod: r.budgetPeriod,
+      colorValue: r.colorValue,
     )).toList();
   }
 
@@ -159,6 +155,7 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
         name: r.name,
         budgetLimit: r.budgetLimit,
         budgetPeriod: r.budgetPeriod,
+        colorValue: r.colorValue,
       )).toList();
     });
   }

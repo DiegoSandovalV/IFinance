@@ -23,6 +23,7 @@ class Tags extends Table {
   TextColumn get name => text()();
   RealColumn get budgetLimit => real().nullable()();
   IntColumn get budgetPeriod => intEnum<BudgetPeriod>().nullable()();
+  IntColumn get colorValue => integer().withDefault(const Constant(0xFF9E9E9E))();
 
   @override
   Set<Column> get primaryKey => {id};
@@ -41,7 +42,16 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
+
+  @override
+  MigrationStrategy get migration => MigrationStrategy(
+    onUpgrade: (m, from, to) async {
+      if (from < 2) {
+        await m.addColumn(tags, tags.colorValue);
+      }
+    },
+  );
 }
 
 LazyDatabase _openConnection() {

@@ -356,8 +356,26 @@ class $TagsTable extends Tags with TableInfo<$TagsTable, Tag> {
         type: DriftSqlType.int,
         requiredDuringInsert: false,
       ).withConverter<BudgetPeriod?>($TagsTable.$converterbudgetPeriodn);
+  static const VerificationMeta _colorValueMeta = const VerificationMeta(
+    'colorValue',
+  );
   @override
-  List<GeneratedColumn> get $columns => [id, name, budgetLimit, budgetPeriod];
+  late final GeneratedColumn<int> colorValue = GeneratedColumn<int>(
+    'color_value',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0xFF9E9E9E),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    name,
+    budgetLimit,
+    budgetPeriod,
+    colorValue,
+  ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -392,6 +410,12 @@ class $TagsTable extends Tags with TableInfo<$TagsTable, Tag> {
         ),
       );
     }
+    if (data.containsKey('color_value')) {
+      context.handle(
+        _colorValueMeta,
+        colorValue.isAcceptableOrUnknown(data['color_value']!, _colorValueMeta),
+      );
+    }
     return context;
   }
 
@@ -419,6 +443,10 @@ class $TagsTable extends Tags with TableInfo<$TagsTable, Tag> {
           data['${effectivePrefix}budget_period'],
         ),
       ),
+      colorValue: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}color_value'],
+      )!,
     );
   }
 
@@ -438,11 +466,13 @@ class Tag extends DataClass implements Insertable<Tag> {
   final String name;
   final double? budgetLimit;
   final BudgetPeriod? budgetPeriod;
+  final int colorValue;
   const Tag({
     required this.id,
     required this.name,
     this.budgetLimit,
     this.budgetPeriod,
+    required this.colorValue,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -457,6 +487,7 @@ class Tag extends DataClass implements Insertable<Tag> {
         $TagsTable.$converterbudgetPeriodn.toSql(budgetPeriod),
       );
     }
+    map['color_value'] = Variable<int>(colorValue);
     return map;
   }
 
@@ -470,6 +501,7 @@ class Tag extends DataClass implements Insertable<Tag> {
       budgetPeriod: budgetPeriod == null && nullToAbsent
           ? const Value.absent()
           : Value(budgetPeriod),
+      colorValue: Value(colorValue),
     );
   }
 
@@ -485,6 +517,7 @@ class Tag extends DataClass implements Insertable<Tag> {
       budgetPeriod: $TagsTable.$converterbudgetPeriodn.fromJson(
         serializer.fromJson<int?>(json['budgetPeriod']),
       ),
+      colorValue: serializer.fromJson<int>(json['colorValue']),
     );
   }
   @override
@@ -497,6 +530,7 @@ class Tag extends DataClass implements Insertable<Tag> {
       'budgetPeriod': serializer.toJson<int?>(
         $TagsTable.$converterbudgetPeriodn.toJson(budgetPeriod),
       ),
+      'colorValue': serializer.toJson<int>(colorValue),
     };
   }
 
@@ -505,11 +539,13 @@ class Tag extends DataClass implements Insertable<Tag> {
     String? name,
     Value<double?> budgetLimit = const Value.absent(),
     Value<BudgetPeriod?> budgetPeriod = const Value.absent(),
+    int? colorValue,
   }) => Tag(
     id: id ?? this.id,
     name: name ?? this.name,
     budgetLimit: budgetLimit.present ? budgetLimit.value : this.budgetLimit,
     budgetPeriod: budgetPeriod.present ? budgetPeriod.value : this.budgetPeriod,
+    colorValue: colorValue ?? this.colorValue,
   );
   Tag copyWithCompanion(TagsCompanion data) {
     return Tag(
@@ -521,6 +557,9 @@ class Tag extends DataClass implements Insertable<Tag> {
       budgetPeriod: data.budgetPeriod.present
           ? data.budgetPeriod.value
           : this.budgetPeriod,
+      colorValue: data.colorValue.present
+          ? data.colorValue.value
+          : this.colorValue,
     );
   }
 
@@ -530,13 +569,15 @@ class Tag extends DataClass implements Insertable<Tag> {
           ..write('id: $id, ')
           ..write('name: $name, ')
           ..write('budgetLimit: $budgetLimit, ')
-          ..write('budgetPeriod: $budgetPeriod')
+          ..write('budgetPeriod: $budgetPeriod, ')
+          ..write('colorValue: $colorValue')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, name, budgetLimit, budgetPeriod);
+  int get hashCode =>
+      Object.hash(id, name, budgetLimit, budgetPeriod, colorValue);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -544,7 +585,8 @@ class Tag extends DataClass implements Insertable<Tag> {
           other.id == this.id &&
           other.name == this.name &&
           other.budgetLimit == this.budgetLimit &&
-          other.budgetPeriod == this.budgetPeriod);
+          other.budgetPeriod == this.budgetPeriod &&
+          other.colorValue == this.colorValue);
 }
 
 class TagsCompanion extends UpdateCompanion<Tag> {
@@ -552,12 +594,14 @@ class TagsCompanion extends UpdateCompanion<Tag> {
   final Value<String> name;
   final Value<double?> budgetLimit;
   final Value<BudgetPeriod?> budgetPeriod;
+  final Value<int> colorValue;
   final Value<int> rowid;
   const TagsCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
     this.budgetLimit = const Value.absent(),
     this.budgetPeriod = const Value.absent(),
+    this.colorValue = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   TagsCompanion.insert({
@@ -565,6 +609,7 @@ class TagsCompanion extends UpdateCompanion<Tag> {
     required String name,
     this.budgetLimit = const Value.absent(),
     this.budgetPeriod = const Value.absent(),
+    this.colorValue = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        name = Value(name);
@@ -573,6 +618,7 @@ class TagsCompanion extends UpdateCompanion<Tag> {
     Expression<String>? name,
     Expression<double>? budgetLimit,
     Expression<int>? budgetPeriod,
+    Expression<int>? colorValue,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -580,6 +626,7 @@ class TagsCompanion extends UpdateCompanion<Tag> {
       if (name != null) 'name': name,
       if (budgetLimit != null) 'budget_limit': budgetLimit,
       if (budgetPeriod != null) 'budget_period': budgetPeriod,
+      if (colorValue != null) 'color_value': colorValue,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -589,6 +636,7 @@ class TagsCompanion extends UpdateCompanion<Tag> {
     Value<String>? name,
     Value<double?>? budgetLimit,
     Value<BudgetPeriod?>? budgetPeriod,
+    Value<int>? colorValue,
     Value<int>? rowid,
   }) {
     return TagsCompanion(
@@ -596,6 +644,7 @@ class TagsCompanion extends UpdateCompanion<Tag> {
       name: name ?? this.name,
       budgetLimit: budgetLimit ?? this.budgetLimit,
       budgetPeriod: budgetPeriod ?? this.budgetPeriod,
+      colorValue: colorValue ?? this.colorValue,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -617,6 +666,9 @@ class TagsCompanion extends UpdateCompanion<Tag> {
         $TagsTable.$converterbudgetPeriodn.toSql(budgetPeriod.value),
       );
     }
+    if (colorValue.present) {
+      map['color_value'] = Variable<int>(colorValue.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -630,6 +682,7 @@ class TagsCompanion extends UpdateCompanion<Tag> {
           ..write('name: $name, ')
           ..write('budgetLimit: $budgetLimit, ')
           ..write('budgetPeriod: $budgetPeriod, ')
+          ..write('colorValue: $colorValue, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -1163,6 +1216,7 @@ typedef $$TagsTableCreateCompanionBuilder =
       required String name,
       Value<double?> budgetLimit,
       Value<BudgetPeriod?> budgetPeriod,
+      Value<int> colorValue,
       Value<int> rowid,
     });
 typedef $$TagsTableUpdateCompanionBuilder =
@@ -1171,6 +1225,7 @@ typedef $$TagsTableUpdateCompanionBuilder =
       Value<String> name,
       Value<double?> budgetLimit,
       Value<BudgetPeriod?> budgetPeriod,
+      Value<int> colorValue,
       Value<int> rowid,
     });
 
@@ -1226,6 +1281,11 @@ class $$TagsTableFilterComposer extends Composer<_$AppDatabase, $TagsTable> {
     builder: (column) => ColumnWithTypeConverterFilters(column),
   );
 
+  ColumnFilters<int> get colorValue => $composableBuilder(
+    column: $table.colorValue,
+    builder: (column) => ColumnFilters(column),
+  );
+
   Expression<bool> expenseTagsRefs(
     Expression<bool> Function($$ExpenseTagsTableFilterComposer f) f,
   ) {
@@ -1279,6 +1339,11 @@ class $$TagsTableOrderingComposer extends Composer<_$AppDatabase, $TagsTable> {
     column: $table.budgetPeriod,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<int> get colorValue => $composableBuilder(
+    column: $table.colorValue,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$TagsTableAnnotationComposer
@@ -1306,6 +1371,11 @@ class $$TagsTableAnnotationComposer
         column: $table.budgetPeriod,
         builder: (column) => column,
       );
+
+  GeneratedColumn<int> get colorValue => $composableBuilder(
+    column: $table.colorValue,
+    builder: (column) => column,
+  );
 
   Expression<T> expenseTagsRefs<T extends Object>(
     Expression<T> Function($$ExpenseTagsTableAnnotationComposer a) f,
@@ -1365,12 +1435,14 @@ class $$TagsTableTableManager
                 Value<String> name = const Value.absent(),
                 Value<double?> budgetLimit = const Value.absent(),
                 Value<BudgetPeriod?> budgetPeriod = const Value.absent(),
+                Value<int> colorValue = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => TagsCompanion(
                 id: id,
                 name: name,
                 budgetLimit: budgetLimit,
                 budgetPeriod: budgetPeriod,
+                colorValue: colorValue,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -1379,12 +1451,14 @@ class $$TagsTableTableManager
                 required String name,
                 Value<double?> budgetLimit = const Value.absent(),
                 Value<BudgetPeriod?> budgetPeriod = const Value.absent(),
+                Value<int> colorValue = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => TagsCompanion.insert(
                 id: id,
                 name: name,
                 budgetLimit: budgetLimit,
                 budgetPeriod: budgetPeriod,
+                colorValue: colorValue,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
